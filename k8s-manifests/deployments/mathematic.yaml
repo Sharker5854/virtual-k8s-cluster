@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mathematic-deployment
+  namespace: vovcha
+  labels:
+    app: math
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: math
+  template:
+    metadata:
+      labels:
+        app: math
+    spec:
+      containers:
+      - name: math-backend
+        image: mathematic/backend:v1
+        ports:
+        - containerPort: 7000
+        - containerPort: 8000
+        - containerPort: 9000
+      - name: nginx-server
+        image: mathematic/nginx-server:v1
+        ports:
+        - containerPort: 80
