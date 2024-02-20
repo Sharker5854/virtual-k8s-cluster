@@ -1,18 +1,20 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: fastapi-access
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+  name: kube-state-ingress
+  namespace: monitoring
+  labels:
+    name: kube-state-ingress
 spec:
   ingressClassName: nginx
   rules:
-  - http:
+  - host: localhost
+    http:
       paths:
-      - path: /
+      - path: "/monitoring"
         pathType: Prefix
         backend:
           service:
-            name: fastapi-service
+            name: kube-prom-stack-grafana
             port:
               number: 80

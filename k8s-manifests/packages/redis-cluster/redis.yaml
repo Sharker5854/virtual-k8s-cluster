@@ -1,0 +1,25 @@
+##
+## Redis Master parameters
+##
+master:
+ persistence:
+   enabled: false
+ extraFlags:
+  - "--maxmemory 256mb"
+ 
+replica:
+ persistence:
+   enabled: false
+ replicaCount: 3
+ extraFlags:
+  - "--maxmemory 256mb"
+##
+## Prometheus Exporter / Metrics
+##
+metrics:
+ enabled: true
+ 
+## Metrics exporter pod Annotation and Labels
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9121"

@@ -1,0 +1,115 @@
+alertmanager:
+  config:
+      global:
+      telegram_api_url: "https://api.telegram.org"
+      route:
+      receiver: telegram-alert
+      group_by: ['alertname', 'cluster', 'service']
+      repeat_interval: 1h
+      routes:
+      - match:
+              severity: critical
+      receiver: telegram-alert
+      continue: true
+      receivers:
+      - name: telegram-alert
+      telegram_configs:
+      - chat_id: <ChatID>
+        bot_token: <BotToken>
+        api_url: "https://api.telegram.org"
+        send_resolved: true
+        parse_mode: html
+        template: |-
+          {{ define "telegram.default" }}
+          {{ range .Alerts }}
+          {{ if eq .Status "firing"}}&#x1F525<b>{{ .Status | toUpper }}</b>&#x1F525{{ else }}&#x2705<b>{{ .Status | toUpper }}</b>&#x2705{{ end }}
+          <b>{{ .Labels.alertname }}</b>
+          {{- if .Labels.severity }}
+          <b>Severity:</b> {{ .Labels.severity }}
+          {{- end }}
+          {{- if .Labels.cluster }}
+          <b>Cluster:</b> {{ .Labels.cluster }}
+          {{- end }}
+          {{- if .Labels.service }}
+          <b>Service:</b> {{ .Labels.service }}
+          {{- end }}
+          {{- if .Labels.instance}}
+          <b>Instance:</b> {{ .Labels.instance }}
+          {{- end }}
+          <b>Description:</b> {{ .Annotations.description }}
+          {{- end }}
+
+additionalPrometheusRulesMap:
+  rule-name:  
+    groups:
+        - name: redis_group
+          rules:
+            - alert: redis_is_running
+              expr: redis_up == 0
+              for: 30s
+              labels:
+                severity: critical
+              annotations:
+                summary: "Critical: Redis is down on the host {{ $labels.instance }}."
+                description: "Redis has been down for more than 30 seconds"
+            - alert: redis_memory_usage
+              expr:  redis_memory_used_bytes / redis_memory_max_bytes * 100 > 40
+              for: 5m
+              labels:
+                severity: warning
+              annotations:
+                description: "Warning: Redis high memory(>40%) usage on the host {{ $labels.instance }} for more than 5 minutes"
+                summary: "Redis memory usage {{ humanize $value}}% of the host memory"
+            - alert: redis_master
+              expr: redis_connected_clients{instance!~"server1.mydomain.com.+"} > 50
+              for: 5m
+              labels:
+                severity: warning
+              annotations:
+                description: "Warning: Redis has many connections on the host {{ $labels.instance }} for more than 5 minutes"
+                summary: "Redis number of connections {{ $value }}"
+            - alert: redis_rejected_connections
+              expr: increase(redis_rejected_connections_total[1m]) > 0
+              for: 30s
+              labels:
+                severity: critical
+              annotations:
+                description: "Critical: Redis rejected connections on the host {{ $labels.instance }}"
+                summary: "Redis rejected connections are {{ $value }}"
+            - alert: redis_evicted_keys
+              expr: increase(redis_evicted_keys_total[1m]) > 0
+              for: 30s
+              labels:
+                severity: critical
+              annotations:
+                description: "Critical: Redis evicted keys on the host {{ $labels.instance }}"
+                summary: "Redis evicted keys are {{ $value }}"
+
+prometheus:
+  prometheusSpec:
+    remoteWriteDashboards: true
+    additionalScrapeConfigs:
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: kubernetes_namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: kubernetes_pod_name
