@@ -5,4 +5,4 @@ WORKDIR /app
 
 RUN pip install -r requirements.txt
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["bash", "-c", "uvicorn main:app --host 0.0.0.0 --port $UVICORN_PORT"]

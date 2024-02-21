@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webapp-conf
+  namespace: vovcha
+data:
+  uvicorn_port_listen: "80"
+  default_response_message: "Godmode."

@@ -34,7 +34,7 @@ public class CircleArea implements HttpHandler {
     }
 
     public static void main(String[] args) throws IOException {
-        HttpServer server = HttpServer.create(new InetSocketAddress(9000), 0);
+        HttpServer server = HttpServer.create(new InetSocketAddress(Integer.parseInt(System.getenv("JAVA_BACKEND_PORT"))), 0);
         server.createContext("/circle-area", new CircleArea());
         server.setExecutor(null);
         server.start();

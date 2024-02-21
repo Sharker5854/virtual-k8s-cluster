@@ -22,7 +22,29 @@ spec:
         - containerPort: 7000
         - containerPort: 8000
         - containerPort: 9000
+        env:
+          - name: JAVA_BACKEND_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: mathapp-conf
+                key: java_backend_port
+          - name: GOLANG_BACKEND_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: mathapp-conf
+                key: golang_backend_port
+        volumeMounts:
+        - name: python-backend-config
+          mountPath: "/python-config"
+          readOnly: true
       - name: nginx-server
         image: mathematic/nginx-server:v1
         ports:
         - containerPort: 80
+      volumes:
+      - name: python-backend-config
+        configMap:
+          name: mathapp-conf
+          items:
+          - key: "python_backend.params"
+            path: "python_backend.params"

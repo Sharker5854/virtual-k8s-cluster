@@ -19,5 +19,3 @@ RUN apk add --no-cache python3 py3-flask
 WORKDIR /code/java
 
 CMD ["sh", "-c", "../go/area & python3 ../python/area.py & java CircleArea"]
-
-EXPOSE 7000 8000 9000

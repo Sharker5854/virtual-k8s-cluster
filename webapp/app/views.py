@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
@@ -9,6 +10,6 @@ def index():
     return JSONResponse(
         content={
             "status_code": 200,
-            "msg": "Wassup Universe!" 
+            "msg": os.environ.get('DEFAULT_RESPONSE_MESSAGE')
         }
     )

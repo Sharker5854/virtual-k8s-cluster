@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"math"
 	"strconv"
 	"net/http"
@@ -23,5 +24,5 @@ func calculateArea(radius int) float64 {
 
 func main() {
 	http.HandleFunc("/circle-area", CircleAreaHandler)
-	http.ListenAndServe(":8000", nil)
+	http.ListenAndServe(":" + os.Getenv("GOLANG_BACKEND_PORT"), nil)
 }

@@ -18,6 +18,17 @@ spec:
       containers:
       - name: fastapi-server
         image: fastapi-server:v1
+        env:
+          - name: UVICORN_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: webapp-conf
+                key: uvicorn_port_listen
+          - name: DEFAULT_RESPONSE_MESSAGE
+            valueFrom:
+              configMapKeyRef:
+                name: webapp-conf
+                key: default_response_message
         ports:
         - containerPort: 80
         volumeMounts:
