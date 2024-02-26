@@ -29,6 +29,11 @@ spec:
               configMapKeyRef:
                 name: webapp-conf
                 key: default_response_message
+          - name: REDIS_DEFAULT_USER_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: webapp-conf
+                key: redis_default_user_password
         ports:
         - containerPort: 80
         volumeMounts:

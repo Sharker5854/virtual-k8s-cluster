@@ -1,10 +1,10 @@
 import datetime
-from pydantic import BaseModel, EmailStr
+from redis_om import HashModel
 
 
-class User(BaseModel):
+class User(HashModel):
     username: str
     password: str
-    email: EmailStr
+    email: str
     age: int
     register_date: datetime.date
