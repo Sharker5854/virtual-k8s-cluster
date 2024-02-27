@@ -1,19 +1,19 @@
 import os
-from fastapi import APIRouter
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Request
+from fastapi.templating import Jinja2Templates
 from redis_schemes import User as redisUser
 from schemes import User
 
 
 router = APIRouter()
 
+html_templates = Jinja2Templates(directory="static")
+
+
 @router.get("/")
-def index():
-    return JSONResponse(
-        content={
-            "status_code": 200,
-            "msg": os.environ.get('DEFAULT_RESPONSE_MESSAGE')
-        }
+def index(request: Request):
+    return html_templates.TemplateResponse(
+        request=request, name="temp.html", context={}
     )
 
 @router.post("/create-user")
