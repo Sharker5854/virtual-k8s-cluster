@@ -39,12 +39,12 @@ spec:
         volumeMounts:
         - name: cache-volume
           mountPath: /tmp/fastapi-cache
-        - name: static-data-volume
-          mountPath: /app/static
+        # - name: static-data-volume
+        #   mountPath: /app/static
       volumes:
       - name: cache-volume
         emptyDir:
           sizeLimit: 100Mi
-      - name: static-data-volume
-        persistentVolumeClaim:
-          claimName: static-data-claim
+      # - name: static-data-volume
+      #   persistentVolumeClaim:
+      #     claimName: static-data-claim
