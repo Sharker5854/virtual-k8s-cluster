@@ -1,32 +1,73 @@
-apiVersion: networking.k8s.io/v1
+apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
   name: redis-policy
   namespace: redis
 spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/instance: redis
-      app.kubernetes.io/name: redis
-  policyTypes:
-  - Ingress
-  - Egress
+  selector: all()
+  types:
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: vovcha
-      podSelector:
-        matchLabels:
-          app: fastapi
-    ports:
-    - protocol: TCP
-      port: 6379
+    - action: Allow
+      metadata:
+        annotations:
+          from: fastapi
+          to: redis
+      protocol: TCP
+      source:
+        namespaceSelector: name == 'vovcha'
+        selector: app == 'fastapi'
+      destination:
+        ports:
+          - 6379
+    - action: Deny
+      metadata:
+        annotations:
+          from: math
+          to: redis
+      protocol: TCP
+      source:
+        namespaceSelector: name == 'vovcha'
+        selector: app == 'math'
+      destination:
+        ports:
+          - 6379
   egress:
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          name: redis
-    ports:
-    - protocol: TCP
-      port: 6379
+    - action: Allow
+      metadata:
+        annotations:
+          from: redis
+          to: redis-namespace
+      protocol: TCP
+      destination:
+        namespaceSelector: name == 'redis'
+
+
+
+  # podSelector:
+  #   matchLabels:
+  #     app.kubernetes.io/instance: redis
+  #     app.kubernetes.io/name: redis
+  # policyTypes:
+  # - Ingress
+  # - Egress
+  # ingress:
+  # - from:
+  #   - namespaceSelector:
+  #       matchLabels:
+  #         name: vovcha
+  #     podSelector:
+  #       matchLabels:
+  #         app: fastapi
+  #   ports:
+  #   - protocol: TCP
+  #     port: 6379
+  # egress:
+  # - to:
+  #   - namespaceSelector:
+  #       matchLabels:
+  #         name: redis
+  #   ports:
+  #   - protocol: TCP
+  #     port: 6379

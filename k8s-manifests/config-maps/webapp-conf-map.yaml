@@ -6,4 +6,4 @@ metadata:
 data:
   uvicorn_port_listen: "80"
   default_response_message: "Godmode."
-  redis_default_user_password: "cL1XfvMVbm"   # kubectl get secret --namespace redis redis -o jsonpath="{.data.redis-password}" | base64 -d
+  redis_default_user_password: "tldjz4PMxg"   # kubectl get secret --namespace redis redis -o jsonpath="{.data.redis-password}" | base64 -d
