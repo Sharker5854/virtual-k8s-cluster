@@ -1,20 +1,31 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: kube-state-ingress
-  namespace: monitoring
-  labels:
-    name: kube-state-ingress
+  name: vovcha-ingress
+  namespace: vovcha
 spec:
-  ingressClassName: nginx
   rules:
-  - host: localhost
+  - host: cluster-vovcha
     http:
       paths:
-      - path: "/monitoring"
+      - path: /all-users
         pathType: Prefix
         backend:
           service:
-            name: kube-prom-stack-grafana
+            name: fastapi-service
+            port:
+              number: 80
+      - path: /create-user
+        pathType: Prefix
+        backend:
+          service:
+            name: fastapi-service
+            port:
+              number: 80
+      - path: /circle-area
+        pathType: Prefix
+        backend:
+          service:
+            name: mathematic-service
             port:
               number: 80
