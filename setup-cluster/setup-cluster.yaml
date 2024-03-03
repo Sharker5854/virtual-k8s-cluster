@@ -1,0 +1,36 @@
+- name: Run kind cluster and load all necessary docker-images into it
+  hosts: hosts
+  become: yes
+  become_user: "{{ become_user }}"
+  vars_files:
+    - configs/default.yaml
+  tasks:
+
+    - name: Run VScode for cluster sources' dir
+      shell: |
+        code {{ run_vscode_in }}
+      args:
+        executable: /bin/bash
+      when: "vars.run_vscode_in is defined and vars.run_vscode_in != ''"
+
+    - name: Create kind cluster
+      shell: | 
+        {{ run_with_config  if  vars.kind_cluster_config is defined and vars.kind_cluster_config != ''  else  run_without_config}}
+      vars:
+        run_with_config: "kind create cluster --config={{ kind_cluster_config }}"
+        run_without_config: "kind create cluster"
+      args:
+        executable: /bin/bash
+
+    - name: Load docker images to kind cluster (also try to pull image from registry if it isn't presented locally)
+      shell: |
+        export IMAGE_TAG=$(docker images -q {{ image_name }}) && if [ -n "$IMAGE_TAG" ]; then kind load docker-image {{ image_name }}; else docker pull {{ image_name }} && kind load docker-image {{ image_name }}; fi
+      loop: "{{ docker_images }}"
+      loop_control:
+        loop_var: image_name
+      vars:
+        load_command: "kind load docker-image {{ image_name }}"
+        pull_load_command: "docker pull {{ image_name }} && {{ load_command }}"
+      args:
+        executable: /bin/bash
+      when: "vars.docker_images is defined"

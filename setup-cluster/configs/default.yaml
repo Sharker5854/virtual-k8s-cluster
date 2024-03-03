@@ -1,0 +1,13 @@
+become_user: "vovcha"
+
+host_system_dist: "ubuntu"
+host_system_version: "jammy"
+
+kind_cluster_config: "../cluster-config.yaml"        # OPTIONAL: Pass custom kind-cluster configuration
+run_vscode_in: "~/Desktop/k8s_prac/kind-cluster"     # OPTIONAL: Launch VisualStudio with specified directory before starting the kind cluster
+
+docker_images:                                       # OPTIONAL: Docker images to be uploaded to the virtual kind cluster
+  - "fastapi-server:v1"
+  - "mathematic/backend:v1"                                       
+  - "mathematic/nginx-server:v1"
+  - "nginx/nginx-ingress"

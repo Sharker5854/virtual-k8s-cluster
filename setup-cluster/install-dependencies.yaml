@@ -1,0 +1,75 @@
+- name: Install all necessary packets and images
+  hosts: hosts
+  become: yes
+  become_user: "{{ become_user }}"
+  vars_files:
+    - configs/default.yaml
+  tasks:
+
+    - name: install dependencies
+      apt:
+        name: "{{item}}"
+        state: present
+        update_cache: yes
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg
+        - software-properties-common
+
+    - name: Install kind
+      shell: |
+        [ $(uname -m) = x86_64 ] && curl -L https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-amd64 -o /usr/local/bin/kind
+        chmod +x /usr/local/bin/kind
+      args:
+        executable: /bin/bash
+        creates: /usr/local/bin/kind
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/{{ host_system_dist }}/gpg
+        state: present
+    - name: Add Docker repository to apt
+      apt_repository:
+        repo: deb https://download.docker.com/linux/{{ host_system_dist }} {{ host_system_version }} stable
+        state: present
+    - name: Install Docker
+      apt:
+        name: "{{item}}"
+        state: latest
+        update_cache: yes
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+    - name: Check Docker daemon is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Install helm if not exists
+      unarchive:
+        src: https://get.helm.sh/helm-v3.14.0-linux-amd64.tar.gz
+        dest: /usr/local/bin
+        extra_opts: "--strip-components=1"
+        remote_src: true
+      args:
+        creates: /usr/local/bin/helm
+
+    - name: Install kubectl tool
+      shell: | 
+        curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" -o /usr/local/bin/kubectl
+        chmod +x /usr/local/bin/kubectl
+      args:
+        executable: /bin/bash
+        creates: /usr/local/bin/kubectl
+
+    - name: Install calicoctl tool
+      shell: | 
+        curl -L https://github.com/projectcalico/calico/releases/download/v3.27.2/calicoctl-linux-amd64 -o /usr/local/bin/calicoctl
+        chmod +x /usr/local/bin/calicoctl
+      args:
+        executable: /bin/bash
+        creates: /usr/local/bin/calicoctl
